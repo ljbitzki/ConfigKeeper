@@ -28,10 +28,13 @@ Client: Ubuntu 10, 12, 14, 16 and 18.
   * When the installation script finishes, ConfigKeeper will be already running and all your changes ate apps.conf will be already been monitored...
 
 ### How it works
-The GitLab server is just a GitLab server. :grin: All the *stuff* happens at clients. 
+The GitLab server is just a GitLab server. :grin: All the *stuff* happens at clients.
+
 At client, there is a file (conf.d/apps.conf) where are declared which service and which folder (recursivelly) should be monitored. In general, all you need to do is modify this file only.
+
 This file is monitored by a script using inotifywait the do all the things needed when a service is add or removed from apps.conf. (all the things needed = create new scripts, one per service monitored, control and commit it to GitLab server)
 When a "app" is monitored, a complete matrix of file permissions is created at "/etc/configkeeper/permissions/" because some services are strictly denpendent os file permissions.
+
 There is implemented a simple temporary file treatment. This is simple, but effective.
 When you are monitoring a file with __*inotify*__ and open it with e.g.__vim__, make some changes and __:wq!__, this events happens, in this order: (the example file is example.txt)
 * CREATE 4913.txt
