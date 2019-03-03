@@ -1,7 +1,24 @@
 #!/bin/bash
 
+if [ "$(whoami)" != "root" ]; then
+  echo "You need to run this script as root!"
+  exit 1
+fi
+
+echo "Entre the IP address or full DNS name of the \"ConfigKeeper\" server:"
+read -r SERVER
+echo "Is \e[33m${SERVER}\e[0m correct? (y/N)"
+read ISC
+case "${ISC}" in
+  y|Y)
+      echo "Let's go!"
+      ;;
+    *)
+      echo -e "\e[31m--------- ERROR ---------> \e[0mYou need to enter a valid answer!"
+      exit 1
+      ;;
+esac
 # Some vars for the setup
-SERVER="configkeeper.dev.ufrgs.br"
 LOGFILE="/var/log/configkeeper.log"
 HOSTNAME=$( awk -F'.' '{print $1}' "/etc/hostname" )
 APPS="/etc/configkeeper/conf.d/apps.conf"
@@ -14,12 +31,13 @@ INITD="/etc/init.d/configkeeper"
 FLF="/usr/share/figlet/3d.flf"
 
 # Installing dependencies...
-echo -e "\e[32m-----> \e[34mInstalling dependencies...\e[0m"
+echo -e "\e[32m-----------------> \e[96mInstalling dependencies...\e[0m"
 apt update
 apt install wget gawk figlet openssh-client inotify-tools git -y
 if [[ ! -f "${FLF}" ]]; then
 	wget ""https://raw.githubusercontent.com/xero/figlet-fonts/master/3d.flf"" -O "${FLF}"
 fi
+echo -e "\e[32m-----------------> \e[96mCreating some directories, files and stuff...\e[0m"
 # Logfile and directories
 touch "/var/log/configkeeper.log"
 chmod 644 "/var/log/configkeeper.log"
@@ -27,20 +45,21 @@ chown root:root "/var/log/configkeeper.log"
 mkdir -p "/var/lock/configkeeper/"
 mkdir -p /etc/configkeeper/{permissions,base,monitors,conf.d}
 
+echo -e "\e[32m-----------------> \e[96mIf \"$(whoami)\" don't have a ssh keypair, generate it.\e[0m"
 # ssh root key generation
 if [[ ! -f "/root/.ssh/id_rsa.pub" ]]; then
   ssh-keygen
-  echo -e "\e[31m-- ERROR --> \e[0mYou need to copy your \"$(whoami)\"\e[0m public key to \"configkeeper\" user (SSH Keys form at GitLab Admin Panel) \e[33m ${SERVER}\e[0m. After that, \e[36mrun again this install script\e[0m."
+  echo -e "\e[31m--------- ERROR ---------> \e[0mYou need to copy your \"$(whoami)\"\e[0m public key to \"configkeeper\" user (SSH Keys form at GitLab Admin Panel) \e[33m at ${SERVER}\e[0m. After that, \e[36mrun again this install script\e[0m."
   cat /root/.ssh/id_rsa.pub
   exit 1
 else
   if [ "$( ssh -T git@${SERVER} | grep -ci 'configkeeper' )" -ne "1" ]; then
-    echo -e "\e[31m-- ERROR --> \e[0mYou need to copy your \"$(whoami)\"\e[0m public key to \"configkeeper\" user (SSH Keys form at GitLab Admin Panel) \e[33m ${SERVER}\e[0m. After that, \e[36mrun again this install script\e[0m."
+  echo -e "\e[31m--------- ERROR ---------> \e[0mYou need to copy your \"$(whoami)\"\e[0m public key to \"configkeeper\" user (SSH Keys form at GitLab Admin Panel) \e[33m ${SERVER}\e[0m. After that, \e[36mrun again this install script\e[0m."
     cat /root/.ssh/id_rsa.pub
     exit 1
   fi
 fi
-
+echo -e "\e[32m-----------------> \e[96mCreating important files...\e[0m"
 # Apps to be monitored
 if [[ ! -f "${APPS}" ]]; then
 cat <<'EOF' > "${APPS}"
@@ -431,6 +450,7 @@ EOF
 fi
 chmod +x "${MAINFILE}"
 
+echo -e "\e[32m-----------------> \e[96mInitial push...\e[0m"
 # Initial push
 TMPAPPS="/tmp/git.apps"
 grep -Ev '^#|^$' "${APPS}" > "${TMPAPPS}"
@@ -447,7 +467,23 @@ while read -r GITAPP GITDIR; do
   fi
 done <"${TMPAPPS}"
 
-# Apps to be monitored
+git config --global user.name "ConfigKeeper"
+git config --global user.email "configkeeper@localhost"
+cd / || exit 1
+git init
+echo '*' > .gitignore
+git add -f .gitignore
+git commit -m "All /" --quiet
+git remote add origin git@${SERVER}:root/"${HOSTNAME}".git
+while read -r GITAPP GITDIR; do
+  git add -f "${GITDIR}"
+done <"${TMPAPPS}"
+git add -f "${PERMDIR}"
+git commit -m "INITIALPUSH: Commit in $(date +'%Y/%m/%d - %H:%M:%S')" --quiet
+git push -u origin master --quiet
+
+echo -e "\e[32m-----------------> \e[96mCreating init script...\e[0m"
+# Init script
 if [[ ! -f "${INITD}" ]]; then
 cat <<'EOF' > "${INITD}"
 #! /bin/bash
@@ -509,22 +545,7 @@ fi
 chmod +x "${INITD}"
 update-rc.d configkeeper defaults
 
-# Initial push
-git config --global user.name "ConfigKeeper"
-git config --global user.email "configkeeper@localhost"
-cd / || exit 1
-git init
-echo '*' > .gitignore
-git add -f .gitignore
-git commit -m "All /" --quiet
-git remote add origin git@${SERVER}:root/"${HOSTNAME}".git
-while read -r GITAPP GITDIR; do
-  git add -f "${GITDIR}"
-done <"${TMPAPPS}"
-git add -f "${PERMDIR}"
-git commit -m "INITIALPUSH: Commit in $(date +'%Y/%m/%d - %H:%M:%S')" --quiet
-git push -u origin master --quiet
-
+echo -e "\e[32m-----------------> \e[96mAdding some stuff to crontab...\e[0m"
 # Setting up the crontab
 sed -i '$ d' "/etc/crontab"
 {
@@ -533,8 +554,10 @@ echo -e "# Apps remapping.\n2 0 * * *   root    /etc/configkeeper/ck.sh \"APP_MO
 echo -e "# Permission remapping.\n3 0 * * *   root    while read GITAPP GITDIR; do /etc/configkeeper/ck.sh PERM_TREE \${GITAPP} \${GITDIR}; done < <( grep -Ev '^#|^$' /etc/configkeeper/conf.d/apps.conf )\n#"
 } >> "/etc/crontab"
 
+echo -e "\e[32m-----------------> \e[96mInitializing ConfigKeeper...\e[0m"
 /etc/init.d/configkeeper start
 
+echo -e "\e[32m-----------------> \e[96mThat's it!\e[0m"
 ( sleep 3 ; echo -e "ConfigKeeper\ninstalled!" | /usr/bin/figlet -w 1200 -f "${FLF}" ; exit 0 ) &
 
 exit 0
