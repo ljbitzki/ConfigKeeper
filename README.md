@@ -9,7 +9,7 @@ Imagine an organization with a production application server, where eventually a
 
 But this particular Admin is lazy/sloppy (and don't have the entire technical knowledge about the running services) and he mess with something, but don't know where and with what and how and (...) the service is out. Stopped.
 
-What the hell happens? How can we get back if 5 minutes ago all are running well...? Well, if your organization have the classical backup strategy, one time a day (by night, e.g.), good1 luck digging log files...
+What the hell happens? How can we get back if 5 minutes ago all are running well...? Well, if your organization have the classical backup strategy, one time a day (by night, e.g.), good luck digging log files...
 
 Using a GitLab server and simple shell scripts (controlling inotify), if a semicolon was removed by accident and that generate a crazy behavior, will be very easy to identify the last change that cause this effect and correct the mistake.
 
@@ -19,31 +19,32 @@ Client: Ubuntu 10, 12, 14, 16 and 18.
 
 ### Steps:
 #### In the "Server":
-*  Install the "server-install.sh" script on the server that will be "The Server", following the in-file instructions;  
-  * Access the web interface, change the "root" password there, add and user "configkeeper" and promote his as Administrador;
-  * (Every new client, you need to add the root public key of this client as a ssh key in "configkeeper" user profile).
+* Install the "server-install.sh" script on the server that will be "The Server", following the in-file instructions;
+ * Access the web interface, change the "root" password there, go do Admin Panel and add a user called "configkeeper" and promote his as Administrador;
+ * Select the "configkeeper" user and "Impersonate". Go to settings to load ssh public keys.
+ * (Every new client, you need to add the root public key of this client as a ssh key in "configkeeper" user profile).
 #### In the "Client":
 * Install the "client-install.sh", following the in-file instructions;
-  * Edit /etc/configkkper/conf.d/apps.conf and change whatever you need (following the in file instructions);
-  * When the installation script finishes, ConfigKeeper will be already running and all your changes ate apps.conf will be already been monitored...
+  * Edit /etc/configkeeper/conf.d/apps.conf and change whatever you need (following the in file instructions);
+  * When the installation script finishes, ConfigKeeper will be already running and all your changes at apps.conf will be monitored...
 
 ### How it works
-The GitLab server is just a GitLab server. :grin: All the *stuff* happens at clients.
+The GitLab server is just a GitLab server. :grin: All the *stuff* happens at clients. In the server, every "client" will be a project.
 
-At client, there is a file (conf.d/apps.conf) where are declared which service and which folder (recursivelly) should be monitored. In general, all you need to do is modify this file only.
+At client, there is a file (conf.d/apps.conf) where are declared which service and which folder should be monitored (recursivelly). In general, all you need to do is modify this file only.
 
-This file is monitored by a script using inotifywait the do all the things needed when a service is add or removed from apps.conf. (all the things needed = create new scripts, one per service monitored, control and commit it to GitLab server)
+This file is monitored by another monitor using inotifywait, which do all the things needed when a service is add or removed from apps.conf. (all the things needed = create new scripts, one per service monitored, control and commit it to GitLab server)
 When a "app" is monitored, a complete matrix of file permissions is created at "/etc/configkeeper/permissions/" because some services are strictly denpendent os file permissions.
 
 There is implemented a simple temporary file treatment. This is simple, but effective.
-When you are monitoring a file with __*inotify*__ and open it with e.g.__vim__, make some changes and __:wq!__, this events happens, in this order: (the example file is example.txt)
+When you are monitoring a file with __*inotify*__ and open it with e.g. __vim__, make some changes and __:wq!__, this events happens, in this order: (the example file is example.txt)
 * CREATE 4913.txt
 * CLOSE,WRITE 4913.txt
 * DELETE 4913.txt
 * CREATE example.txt
 * CLOSE,WRITE example.txt
 
-We don't what to save/versionate 4913.txt, so there is a workaround implemented.
+We don't what to save/versionate 4913.txt (vim temporary file), so there is a workaround implemented.
 
 ##### Server components:
 * Gitlab-ee default stock installation
@@ -60,6 +61,5 @@ We don't what to save/versionate 4913.txt, so there is a workaround implemented.
 * PIDs directory:   /tmp/configkeeper/
 * Log File:         /var/log/configkeeper.log
 * Init script:      /etc/init.d/configkeeper
-
 
 # Contributions are very welcome! :grimacing:
