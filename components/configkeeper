@@ -1,0 +1,54 @@
+#! /bin/bash
+
+### BEGIN INIT INFO
+# Provides:          ConfigKeeper
+# Required-Start:    $local_fs $network
+# Required-Stop:     $local_fs
+# Default-Start:     2 3 4 5
+# Default-Stop:      0 1 6
+# Short-Description: ConfigKeeper Service
+# Description:       Run ConfigKeeper Service
+### END INIT INFO
+MONDIR="/etc/configkeeper/monitors/"
+PIDSDIR="/tmp/configkeeper/"
+case "${1}" in
+  start)
+    if [ $( ps aux | grep "inotifywait" | wc -l ) -lt 2 ]; then
+      echo "Starting ConfigKeeper and loading monitors..."
+      while read APPS; do
+        "${APPS}" &
+      done < <( find "${MONDIR}" -type f )
+      echo "ConfigKeeper started!"
+      exit 0
+    else
+      echo "ConfigKeeper is already running!"
+      echo "Stop this shit first!"
+      exit 1
+    fi
+    ;;
+  stop)
+    echo "Stopping ConfigKeeper..."
+      killall inotifywait
+      wait
+      while read PIDS; do
+        GITPID="${PIDS##*/}"
+        PID=$( echo "${GITPID}" | awk -F'.' '{print $1}' )
+        kill -9 "${PID}"
+        rm -f "${PIDSDIR}${GITPID}"
+      done < <( find "${PIDSDIR}" -type f -name "*.pid" )
+      echo "All monitors killed and ConfigKeeper stoped!"
+      exit 0
+    ;;
+  restart|reload)
+    echo "Restarting/Reloading ConfigKeeper..."
+    "${0}" "stop"
+    sleep 1
+    "${0}" "start"
+    exit 0
+    ;;
+  *)
+    echo "Usage: /etc/init.d/configkeeper {start|stop|restart|reload}"
+    exit 1
+    ;;
+esac
+exit 0

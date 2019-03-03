@@ -1,0 +1,67 @@
+#!/bin/bash
+if [[ ! -d "/tmp/configkeeper/" ]]; then
+  mkdir -p "/tmp/configkeeper/"
+fi
+PID=$$
+echo "${PID}" > "/tmp/configkeeper/${PID}.pid"
+HOSTNAME=$( awk -F'.' '{print $1}' "/etc/hostname" )
+PERMDIR="/etc/configkeeper/permissions/"
+LOGFILE="/var/log/configkeeper.log"
+LOCKDIR="/var/lock/configkeeper"
+CK="/etc/configkeeper/ck.sh"
+MONDIR="/etc/configkeeper/monitors"
+APPS="/etc/configkeeper/conf.d/apps.conf"
+
+function LOCK() {
+  echo '1' > "${LOCKDIR}/${MFILE}.lock"
+  sleep 4
+  if [[ -f "${LOCKDIR}/${MFILE}.lock" ]]; then
+    rm -f "${LOCKDIR}/${MFILE}.lock"
+  fi
+}
+
+function APP_MONITOR() {
+  sleep 2
+  if [[ -f "${LOCKDIR}/${MFILE}.lock" ]]; then
+    if [ "$( cat "${LOCKDIR}/${MFILE}.lock" )" -eq "0" ]; then
+    echo -e "$(date +'%b %d %H:%M:%S') ${HOSTNAME} APPS_MONITORED: Modified!\t\t\"${FULLPATH}\"" >> "${LOGFILE}"
+    "${CK}" "APP_MONITOR" &
+    while read -r GITAPP GITDIR; do
+      "${CK}" "COMMIT" "${GITAPP}" "${MFILE}" "${GITDIR}"
+      sleep 1
+    done < <( grep -Ev '^#|^$' "${APPS}" | sort )
+      sleep 1
+      "${CK}" "COMMIT" "Permissions" "PERM_FILES" "${PERMDIR}"
+      if [[ -f "${LOCKDIR}/${MFILE}.lock" ]]; then
+        rm -f "${LOCKDIR}/${MFILE}.lock"
+      fi
+    fi
+  fi
+}
+
+while read EVENT FULLPATH; do
+MFILE=${FULLPATH##*/}
+  case "${EVENT}" in
+    CREATE)
+      if [[ ! -f "${LOCKDIR}/${MFILE}" ]]; then
+        echo '0' > "${LOCKDIR}/${MFILE}.lock"
+      fi
+      ;;
+    CLOSE*)
+      if [ "$( cat "${LOCKDIR}/${MFILE}.lock" )" -eq "0" ]; then
+        APP_MONITOR &
+      fi
+      ;;
+    DELETE)
+      if [[ -f "${LOCKDIR}/${MFILE}.lock" ]]; then
+        if [ "$( cat "${LOCKDIR}/${MFILE}.lock" )" -eq "0" ]; then
+          LOCK &
+          APP_MONITOR &
+        fi
+      else
+        echo '0' > "${LOCKDIR}/${MFILE}.lock"
+        APP_MONITOR &
+      fi
+      ;;
+  esac
+done < <( inotifywait -q -q -mr --format "%e %w%f" "/etc/configkeeper/conf.d/" -e create -e close_write -e delete --excludei '.*(\..*\.sw.$|\.swp$|.*\.swp\..*|\.swp.$|\~$|\.tmp$|^\.\/)' )
