@@ -44,18 +44,20 @@ When you are monitoring a file with __*inotify*__ and open it with e.g.__vim__, 
 * CLOSE,WRITE example.txt
 We don't what to save/versionate 4913.txt, so there is a workaround implemented.
 
-Server components:
-Gitlab-ee default stock installation
+* Server components:
+ * Gitlab-ee default stock installation
 
-Client components:
-Installation:     /etc/configkeeper/
-Main script:      /etc/configkeeper/ck.sh
-Apps monitor:     /etc/configkeeper/monitors/apps.mon
-Monitored apps:   /etc/configkeeper/conf.d/apps.conf
-Monitors:         /etc/configkeeper/monitors/${apps}.conf
-Permissions:      /etc/configkeeper/permissions/${apps}.perms
-Template:         /etc/configkeeper/base/template.app
-Lock directory:   /var/lock/configkeeper/
-PIDs directory:   /tmp/configkeeper/
-Log File:         /var/log/configkeeper.log
-Init script:      /etc/init.d/configkeeper
+* Client components:
+ * Installation:     /etc/configkeeper/
+ * Main script:      /etc/configkeeper/ck.sh
+ * Apps monitor:     /etc/configkeeper/monitors/apps.mon
+ * Monitored apps:   /etc/configkeeper/conf.d/apps.conf
+ * Monitors:         /etc/configkeeper/monitors/${apps}.conf
+ * Permissions:      /etc/configkeeper/permissions/${apps}.perms
+ * Template:         /etc/configkeeper/base/template.app
+ * Lock directory:   /var/lock/configkeeper/
+ * PIDs directory:   /tmp/configkeeper/
+ * Log File:         /var/log/configkeeper.log
+ * Init script:      /etc/init.d/configkeeper
+
+# Contributions are very welcome! :grimacing:
