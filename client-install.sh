@@ -7,7 +7,7 @@ fi
 
 echo "Entre the IP address or full DNS name of the \"ConfigKeeper\" server:"
 read -r SERVER
-echo "Is \e[33m${SERVER}\e[0m correct? (y/N)"
+echo -e "Is \e[33m${SERVER}\e[0m correct? (y/N)"
 read ISC
 case "${ISC}" in
   y|Y)
@@ -49,12 +49,12 @@ echo -e "\e[32m-----------------> \e[96mIf \"$(whoami)\" don't have a ssh keypai
 # ssh root key generation
 if [[ ! -f "/root/.ssh/id_rsa.pub" ]]; then
   ssh-keygen
-  echo -e "\e[31m--------- ERROR ---------> \e[0mYou need to copy your \"$(whoami)\"\e[0m public key to \"configkeeper\" user (SSH Keys form at GitLab Admin Panel) \e[33m at ${SERVER}\e[0m. After that, \e[36mrun again this install script\e[0m."
+  echo -e "\e[33m--------- WARNING ---------> \e[0mYou need to copy your \"$(whoami)\"\e[0m public key to \"configkeeper\" user (SSH Keys form at GitLab Admin Panel) \e[33m at ${SERVER}\e[0m. After that, \e[36mrun again this install script\e[0m."
   cat /root/.ssh/id_rsa.pub
   exit 1
 else
   if [ "$( ssh -T git@${SERVER} | grep -ci 'configkeeper' )" -ne "1" ]; then
-  echo -e "\e[31m--------- ERROR ---------> \e[0mYou need to copy your \"$(whoami)\"\e[0m public key to \"configkeeper\" user (SSH Keys form at GitLab Admin Panel) \e[33m ${SERVER}\e[0m. After that, \e[36mrun again this install script\e[0m."
+  echo -e "\e[33m--------- WARNING ---------> \e[0mYou need to copy your \"$(whoami)\"\e[0m public key to \"configkeeper\" user (SSH Keys form at GitLab Admin Panel) \e[33m ${SERVER}\e[0m. After that, \e[36mrun again this install script\e[0m."
     cat /root/.ssh/id_rsa.pub
     exit 1
   fi
@@ -154,7 +154,7 @@ MFILE=${FULLPATH##*/}
       fi
       ;;
   esac
-done < <( inotifywait -q -q -mr --format "%e %w%f" "/etc/configkeeper/conf.d/" -e create -e close_write -e delete --excludei '.*(\..*\.sw.$|\.swp$|.*\.swp\..*|\.swp.$|\~$|\.tmp$|^\.\/)' )
+done < <( inotifywait -mr --format "%e %w%f" "/etc/configkeeper/conf.d/" -e create -e close_write -e delete --excludei '.*(\..*\.sw.$|\.swp$|.*\.swp\..*|\.swp.$|\~$|\.tmp$|^\.\/)' )
 EOF
 fi
 chmod +x "${APPS_MON}"
@@ -244,7 +244,7 @@ FFILE=${FULLPATH##*/}
       COMMITF "${FULLPATH}" "${FULLPATH}" "${EVENT}" &
       ;;
   esac
-done < <( inotifywait -q -q -mr --format "%e %w%f" DPH -e create -e close_write -e delete -e move --excludei '.*(\..*\.sw.$|\.swp$|.*\.swp\..*|\.swp.$|\~$|\.tmp$|^\.\/)' )
+done < <( inotifywait -mr --format "%e %w%f" DPH -e create -e close_write -e delete -e move --excludei '.*(\..*\.sw.$|\.swp$|.*\.swp\..*|\.swp.$|\~$|\.tmp$|^\.\/)' )
 EOF
 fi
 
