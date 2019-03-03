@@ -292,7 +292,7 @@ DIFF="0"
   git add -f "${GITDIR}"
   rm -f "${GITLST}"
   cd "${GITDIR}" || exit 0
-  git commit -m "Commit in $(date +'%Y/%m/%d - %H:%M:%S')" --quiet
+  git commit -m "Commit in $(date +'%Y/%m/%d - %H:%M:%S')" --quiet &> /dev/null
   git push -u origin master --quiet
   wait
   echo "$(date +'%b %d %H:%M:%S') ${HOSTNAME} CK-COMMIT: ${GITAPP} commited!" >> "${LOGFILE}"
@@ -473,13 +473,13 @@ cd / || exit 1
 git init
 echo '*' > .gitignore
 git add -f .gitignore
-git commit -m "All /" --quiet
+git commit -m "All /" --quiet &> /dev/null
 git remote add origin git@${SERVER}:root/"${HOSTNAME}".git
 while read -r GITAPP GITDIR; do
   git add -f "${GITDIR}"
 done <"${TMPAPPS}"
 git add -f "${PERMDIR}"
-git commit -m "INITIALPUSH: Commit in $(date +'%Y/%m/%d - %H:%M:%S')" --quiet
+git commit -m "INITIALPUSH: Commit in $(date +'%Y/%m/%d - %H:%M:%S')" --quiet &> /dev/null
 git push -u origin master --quiet
 
 echo -e "\e[32m-----------------> \e[96mCreating init script...\e[0m"
@@ -551,7 +551,8 @@ sed -i '$ d' "/etc/crontab"
 {
 echo -e "# Garbage collector from orphan lock files.\n1 0 * * *   root    find /var/lock/configkeeper/ -type f -mtime +1 -delete"
 echo -e "# Apps remapping.\n2 0 * * *   root    /etc/configkeeper/ck.sh \"APP_MONITOR\""
-echo -e "# Permission remapping.\n3 0 * * *   root    while read GITAPP GITDIR; do /etc/configkeeper/ck.sh PERM_TREE \${GITAPP} \${GITDIR} \${GITDIR}; done < <( grep -Ev '^#|^$' /etc/configkeeper/conf.d/apps.conf )\n#"
+echo -e "# Permission remapping.\n3 0 * * *   root    while read GITAPP GITDIR; do /etc/configkeeper/ck.sh PERM_TREE \${GITAPP} \${GITDIR} \${GITDIR}; done < <( grep -Ev '^#|^$' /etc/configkeeper/conf.d/apps.conf )"
+echo -e "# Permission commit.\n3 5 * * *   root    cd /etc/configkeeper/permissions/ || exit; /etc/configkeeper/ck.sh COMMIT permissions permissions /etc/configkeeper/permissions/\n#"
 } >> "/etc/crontab"
 
 echo -e "\e[32m-----------------> \e[96mInitializing ConfigKeeper...\e[0m"
