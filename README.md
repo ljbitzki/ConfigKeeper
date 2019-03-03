@@ -19,14 +19,14 @@ Client: Ubuntu 10, 12, 14, 16 and 18.
 
 ### Steps:
 #### In the "Server":
-* Install the "server-install.sh" script on the server that will be "The Server", following the in-file instructions;
- * Access the web interface, change the "root" password there, go do Admin Panel and add a user called "configkeeper" and promote his as Administrador;
- * Select the "configkeeper" user and "Impersonate". Go to settings to load ssh public keys.
- * (Every new client, you need to add the root public key of this client as a ssh key in "configkeeper" user profile).
+1. Install the "server-install.sh" script on the server that will be "The Server", following the in-file instructions;
+ 1. Access the web interface, change the "root" password there, go do Admin Panel and add a user called "configkeeper" and promote his as Administrador;
+ 1. Select the "configkeeper" user and "Impersonate". Go to settings to load ssh public keys.
+ 1. (Every new client, you need to add the root public key of this client as a ssh key in "configkeeper" user profile).
 #### In the "Client":
-* Install the "client-install.sh", following the in-file instructions;
-  * Edit /etc/configkeeper/conf.d/apps.conf and change whatever you need (following the in file instructions);
-  * When the installation script finishes, ConfigKeeper will be already running and all your changes at apps.conf will be monitored...
+1. Install the "client-install.sh", following the in-file instructions;
+  1. Edit /etc/configkeeper/conf.d/apps.conf and change whatever you need (following the in file instructions);
+  1. When the installation script finishes, ConfigKeeper will be already running and all your changes at apps.conf will be monitored...
 
 ### How it works
 The GitLab server is just a GitLab server. :grin: All the *stuff* happens at clients. In the server, every "client" will be a project.
