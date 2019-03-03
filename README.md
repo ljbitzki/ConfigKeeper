@@ -5,7 +5,7 @@ That's a little and simple piece of software created to help SysAdmins in scenar
 
 With a classic architecture of clients talking to a centralized server, ConfigKeeper can keep track of any slightly change in sensible configuration files of a service, with a very efficient use of resources.
 
-Imagine an organization with a production aaplication server, where eventually an Administrator (in a team of administrators) enters to adjust some conf files, update de OS, this kind of stuff.
+Imagine an organization with a production application server, where eventually an Administrator (in a team of administrators) enters to adjust some conf files, update de OS, this kind of stuff.
 
 But this particular Admin is lazy/sloppy (and don't have the entire technical knowledge about the running services) and he mess with something, but don't know where and with what and how and (...) the service is out. Stopped.
 
@@ -28,10 +28,18 @@ Client: Ubuntu 10, 12, 14, 16 and 18.
   * When the installation script finishes, ConfigKeeper will be already running and all your changes ate apps.conf will be already been monitored...
 
 ### How it works
-
-
-
-
+The GitLab server is just a GitLab server. :grin: All the *stuff* happens at clients. 
+At client, there is a file (conf.d/apps.conf) where are declared which service and which folder (recursivelly) should be monitored. In general, all you need to do is modify this file only.
+This file is monitored by a script using inotifywait the do all the things needed when a service is add or removed from apps.conf. (all the things needed = create new scripts, one per service monitored, control and commit it to GitLab server)
+When a "app" is monitored, a complete matrix of file permissions is created at "/etc/configkeeper/permissions/" because some services are strictly denpendent os file permissions.
+There is implemented a simple temporary file treatment. This is simple, but effective.
+When you are monitoring a file with __*inotify*__ and open it with e.g.__vim__, make some changes and __:wq!__, this events happens, in this order: (the example file is example.txt)
+* CREATE 4913.txt
+* CLOSE,WRITE 4913.txt
+* DELETE 4913.txt
+* CREATE example.txt
+* CLOSE,WRITE example.txt
+We don't what to save/versionate 4913.txt, so there is a workaround implemented.
 
 Server components:
 Gitlab-ee default stock installation
@@ -42,7 +50,7 @@ Main script:      /etc/configkeeper/ck.sh
 Apps monitor:     /etc/configkeeper/monitors/apps.mon
 Monitored apps:   /etc/configkeeper/conf.d/apps.conf
 Monitors:         /etc/configkeeper/monitors/${apps}.conf
-Permissions:      /etc/configkeeper/perms/${apps}.perms
+Permissions:      /etc/configkeeper/permissions/${apps}.perms
 Template:         /etc/configkeeper/base/template.app
 Lock directory:   /var/lock/configkeeper/
 PIDs directory:   /tmp/configkeeper/
