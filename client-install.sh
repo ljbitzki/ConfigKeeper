@@ -154,7 +154,7 @@ MFILE=${FULLPATH##*/}
       fi
       ;;
   esac
-done < <( inotifywait -mr --format "%e %w%f" "/etc/configkeeper/conf.d/" -e create -e close_write -e delete --excludei '.*(\..*\.sw.$|\.swp$|.*\.swp\..*|\.swp.$|\~$|\.tmp$|^\.\/)' )
+done < <( inotifywait -q -mr --format "%e %w%f" "/etc/configkeeper/conf.d/" -e create -e close_write -e delete --excludei '.*(\..*\.sw.$|\.swp$|.*\.swp\..*|\.swp.$|\~$|\.tmp$|^\.\/)' )
 EOF
 fi
 chmod +x "${APPS_MON}"
@@ -244,7 +244,7 @@ FFILE=${FULLPATH##*/}
       COMMITF "${FULLPATH}" "${FULLPATH}" "${EVENT}" &
       ;;
   esac
-done < <( inotifywait -mr --format "%e %w%f" DPH -e create -e close_write -e delete -e move --excludei '.*(\..*\.sw.$|\.swp$|.*\.swp\..*|\.swp.$|\~$|\.tmp$|^\.\/)' )
+done < <( inotifywait -q -mr --format "%e %w%f" DPH -e create -e close_write -e delete -e move --excludei '.*(\..*\.sw.$|\.swp$|.*\.swp\..*|\.swp.$|\~$|\.tmp$|^\.\/)' )
 EOF
 fi
 
