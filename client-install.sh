@@ -251,7 +251,7 @@ fi
 if [[ ! -f "${MAINFILE}" ]]; then
 cat <<'EOF' > "${MAINFILE}"
 #!/bin/bash
-
+LOGFILE="/var/log/configkeeper.log"
 FUNCTION_CALL="${1}"
 GITAPP=${2}
 GITFILE="${3}"
@@ -551,7 +551,7 @@ sed -i '$ d' "/etc/crontab"
 {
 echo -e "# Garbage collector from orphan lock files.\n1 0 * * *   root    find /var/lock/configkeeper/ -type f -mtime +1 -delete"
 echo -e "# Apps remapping.\n2 0 * * *   root    /etc/configkeeper/ck.sh \"APP_MONITOR\""
-echo -e "# Permission remapping.\n3 0 * * *   root    while read GITAPP GITDIR; do /etc/configkeeper/ck.sh PERM_TREE \${GITAPP} \${GITDIR}; done < <( grep -Ev '^#|^$' /etc/configkeeper/conf.d/apps.conf )\n#"
+echo -e "# Permission remapping.\n3 0 * * *   root    while read GITAPP GITDIR; do /etc/configkeeper/ck.sh PERM_TREE \${GITAPP} \${GITDIR} \${GITDIR}; done < <( grep -Ev '^#|^$' /etc/configkeeper/conf.d/apps.conf )\n#"
 } >> "/etc/crontab"
 
 echo -e "\e[32m-----------------> \e[96mInitializing ConfigKeeper...\e[0m"
