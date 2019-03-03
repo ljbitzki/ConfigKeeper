@@ -42,6 +42,7 @@ When you are monitoring a file with __*inotify*__ and open it with e.g.__vim__, 
 * DELETE 4913.txt
 * CREATE example.txt
 * CLOSE,WRITE example.txt
+
 We don't what to save/versionate 4913.txt, so there is a workaround implemented.
 
 * Server components:
