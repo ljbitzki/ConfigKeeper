@@ -54,7 +54,7 @@ We don't what to save/versionate 4913.txt (vim temporary file), so there is a wo
 * Main script:      /etc/configkeeper/ck.sh
 * Apps monitor:     /etc/configkeeper/monitors/apps.mon
 * Monitored apps:   /etc/configkeeper/conf.d/apps.conf
-* Monitors:         /etc/configkeeper/monitors/${apps}.conf
+* Monitors:         /etc/configkeeper/monitors/${apps}.app
 * Permissions:      /etc/configkeeper/permissions/${apps}.perms
 * Template:         /etc/configkeeper/base/template.app
 * Lock directory:   /var/lock/configkeeper/
