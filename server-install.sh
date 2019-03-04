@@ -11,7 +11,7 @@ ssh-keygen -o -t rsa -b 4096
 apt update
 apt dist-upgrade -y
 # Dependencies installation
-apt install rsync gzip openssh-server postfix diffutils gcc make pkg-config build-essential git cmake ca-certificates automake autoconf autogen -y
+apt install rsync gzip openssh-server postfix diffutils curl gcc make pkg-config build-essential git cmake ca-certificates automake autoconf autogen -y
 # Last official installation script from GitLab
 curl https://packages.gitlab.com/install/repositories/gitlab/gitlab-ee/script.deb.sh | sudo bash
 # Proper installation 
