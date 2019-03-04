@@ -63,8 +63,8 @@ echo -e "\e[32m-----------------> \e[96mCreating important files...\e[0m"
 # Apps to be monitored
 if [[ ! -f "${APPS}" ]]; then
 cat <<'EOF' > "${APPS}"
-#### Create one "system" per line, white a blank space of separation, where: "app /full/path/to/application/" (ended with "/")
-#### Ex.: apache2 /etc/apache2/
+#### Create one "system" per line, with a blank space or tab of separation, where: "app /full/path/to/application/" (ended with "/")
+#### e.g.: apache2 /etc/apache2/
 #### Change this file when any adjustments are needed. Please, don't remove this instructions.
 #### Some sugestions... Just uncomment some other or add more.
 #### "/etc/default/", "/etc/rsyslog.d/", "/etc/logrotate.d/" e "/etc/ssh/" will be monitored by default.
