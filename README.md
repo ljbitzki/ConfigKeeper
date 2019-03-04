@@ -7,7 +7,7 @@ With a classic architecture of clients talking to a centralized server, ConfigKe
 
 Imagine an organization with a production application server, where eventually an Administrator (in a team of administrators) enters to adjust some conf files, update de OS, this kind of stuff.
 
-But this particular Admin is lazy/sloppy (and don't have the entire technical knowledge about the running services) and he mess with something, but don't know where and with what and how and (...) the service is out. Stopped.
+But this particular Admin is lazy/sloppy (and don't have the entire technical knowledge about the running services) and (s)he mess with something, but don't know where and with what and how and (...) the service is out. Stopped.
 
 What the hell happens? How can we get back if 5 minutes ago all are running ok...? Well, if your organization have the classical backup strategy, one time a day (by night, e.g.), good luck digging log files...
 
