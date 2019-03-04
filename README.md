@@ -9,7 +9,7 @@ Imagine an organization with a production application server, where eventually a
 
 But this particular Admin is lazy/sloppy (and don't have the entire technical knowledge about the running services) and he mess with something, but don't know where and with what and how and (...) the service is out. Stopped.
 
-What the hell happens? How can we get back if 5 minutes ago all are running well...? Well, if your organization have the classical backup strategy, one time a day (by night, e.g.), good luck digging log files...
+What the hell happens? How can we get back if 5 minutes ago all are running ok...? Well, if your organization have the classical backup strategy, one time a day (by night, e.g.), good luck digging log files...
 
 Using a GitLab server and simple shell scripts (controlling inotify), if a semicolon was removed by accident and that generate a crazy behavior, will be very easy to identify the last change that cause this effect and correct the mistake.
 
