@@ -29,6 +29,7 @@ Client: Ubuntu 10, 12, 14, 16 and 18.
   1. When the installation script finishes, ConfigKeeper will be already running and all your changes at apps.conf will be monitored...
 
 ### How it works
+![Diagram](https://github.com/ljbitzki/ConfigKeeper/raw/master/diagram.png)
 The GitLab server is just a GitLab server. :grin: All the *stuff* happens at clients. In the server, every "client" will be a project.
 
 At client, there is a file (conf.d/apps.conf) where are declared which service and which folder should be monitored (recursivelly). In general, all you need to do is modify this file only.
